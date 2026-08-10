@@ -11,6 +11,7 @@ import appointmentOutcomeFormFactory from '../../testutils/factories/appointment
 import SessionService from '../../services/sessionService'
 import sessionFactory from '../../testutils/factories/sessionFactory'
 import OffenderService from '../../services/offenderService'
+import paths from '../../paths'
 
 jest.mock('../../pages/appointments/attendanceOutcomePage')
 
@@ -19,7 +20,12 @@ describe('AttendanceOutcomeController', () => {
   const appointmentId = '1'
   const contactOutcomes = contactOutcomesFactory.build()
 
-  const request = createMock<Request>({ params: { appointmentId }, query: { form: 'some-id' }, body: undefined })
+  const request = createMock<Request>({
+    params: { appointmentId },
+    query: { form: 'some-id' },
+    body: undefined,
+    path: paths.appointments.update({ projectCode: 'N45', appointmentId: '1', page: 'attendance-outcome' }),
+  })
   const response = createMock<Response>({ locals: { user: { username: userName } } })
   const next: DeepMocked<NextFunction> = createMock<NextFunction>({})
 
@@ -112,12 +118,38 @@ describe('AttendanceOutcomeController', () => {
       })
     })
 
+    describe('given a create route', () => {
+      const createRequest = createMock<Request>({
+        params: { appointmentId },
+        query: { form: 'some-id' },
+        body: undefined,
+        path: paths.appointments.create({ projectCode: 'N45', page: 'attendance-outcome' }),
+      })
+
+      it('should return attended outcomes only', async () => {
+        const appointment = appointmentFactory.build()
+        const form = appointmentOutcomeFormFactory.build()
+
+        appointmentService.getAppointment.mockResolvedValue(appointment)
+        referenceDataService.getAvailableContactOutcomes.mockResolvedValue(contactOutcomes)
+        formService.getForm.mockResolvedValue(form)
+
+        const requestHandler = controller.show()
+        await requestHandler(createRequest, response, next)
+
+        const attendedOutcomes = contactOutcomes.contactOutcomes.filter(c => c.attended)
+
+        expect(mockPageInstance.viewData).toHaveBeenCalledWith(appointment, form, attendedOutcomes, undefined, true)
+      })
+    })
+
     describe('given a session (bulk) route', () => {
       const sessionDate = '2026-06-01'
       const bulkRequest = createMock<Request>({
         params: { projectCode: '2', date: sessionDate },
         query: { form: 'some-id' },
         body: {},
+        path: paths.sessions.update({ projectCode: 'N45', date: sessionDate, page: 'attendance-outcome' }),
       })
 
       it('should pass undefined instead of the session to page.viewData, with isSingleAppointment false', async () => {
