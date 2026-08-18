@@ -435,7 +435,7 @@ context('Session details', () => {
       cy.task('stubGetContactOutcomes', { contactOutcomes })
       cy.task(
         'stubGetAppointmentForm',
-        appointmentOutcomeFormFactory.build({ providerCode: appointmentWithoutContactOutcome.providerCode }),
+        appointmentOutcomeFormFactory.build({ provider: { code: appointmentWithoutContactOutcome.providerCode } }),
       )
       // When I click update
       page.clickUpdate()
@@ -463,7 +463,7 @@ context('Session details', () => {
       cy.task('stubGetContactOutcomes', { contactOutcomes })
       cy.task(
         'stubGetAppointmentForm',
-        appointmentOutcomeFormFactory.build({ providerCode: appointmentInThePast.providerCode }),
+        appointmentOutcomeFormFactory.build({ provider: { code: appointmentInThePast.providerCode } }),
       )
 
       const teams = providerTeamSummaryFactory.buildList(2)

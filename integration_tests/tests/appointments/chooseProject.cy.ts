@@ -63,7 +63,7 @@ context('Choose project', () => {
     const form = appointmentOutcomeFormFactory.build({
       projectTeam: { code: project.teamCode },
       project: { code: project.projectCode },
-      providerCode: project.providerCode,
+      provider: { code: project.providerCode },
       projectTypeGroup: project.projectType.group,
     })
     cy.wrap(form).as('form')
@@ -76,11 +76,11 @@ context('Choose project', () => {
     })
     cy.wrap(selectedProject).as('selectedProject')
 
-    cy.task('stubGetTeams', { teams: { providers: [team] }, providerCode: form.providerCode })
+    cy.task('stubGetTeams', { teams: { providers: [team] }, providerCode: form.provider.code })
     cy.task('stubGetProjects', {
       projects: { content: [selectedProject] },
       teamCode: form.projectTeam.code,
-      providerCode: form.providerCode,
+      providerCode: form.provider.code,
     })
 
     cy.task('stubFindAppointment', { appointment })
